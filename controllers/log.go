@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"ECommerce"
+	"ECommerce/utility"
 	"bytes"
 	"context"
 	"errors"
@@ -134,6 +134,6 @@ func Log(level LEVEL, val ...interface{}) {
 	}
 }
 
-func LogCDR(cdr main.CDR) {
+func LogCDR(cdr utility.CDR) {
 	log.Printf(cdr.Log())
 }

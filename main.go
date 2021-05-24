@@ -2,6 +2,7 @@ package main
 
 import (
 	"ECommerce/controllers"
+	"ECommerce/utility"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -48,7 +49,8 @@ func main() {
 
 	controllers.RelayRoutes(apiRouteGroup.Group("/relay"))
 
-	controllers.LogCDR(CDR{from: "0912", to: "0913"})
+	cdr := utility.CDR{From: "sasa", To: "sasasa"}
+	controllers.LogCDR(cdr)
 	controllers.Log(245, "dsadsadsadsa")
 
 	goGonicEngine.Run(":8080") // listen and serve on 0.0.0.0:8080
