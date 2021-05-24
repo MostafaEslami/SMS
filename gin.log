@@ -2,14 +2,5 @@
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] GET    /api/loadbanance/servers  --> ECommerce/controllers.ListServer (4 handlers)
-[GIN-debug] GET    /api/loadbanance/poll     --> ECommerce/controllers.PollServer (4 handlers)
-[GIN-debug] GET    /api/loadbanance/monitoring --> ECommerce/controllers.Monitoring (4 handlers)
-[GIN-debug] POST   /api/loadbanance/disable  --> ECommerce/controllers.DisableServer (4 handlers)
-[GIN-debug] POST   /api/loadbanance/enable   --> ECommerce/controllers.EnableServer (4 handlers)
-[GIN-debug] POST   /api/loadbanance/panic    --> ECommerce/controllers.PanicServer (4 handlers)
-[GIN-debug] POST   /api/loadbanance/add      --> ECommerce/controllers.AddServer (4 handlers)
-[GIN-debug] DELETE /api/loadbanance/delete   --> ECommerce/controllers.DeleteServer (4 handlers)
+[GIN-debug] POST   /api/relay/send           --> ECommerce/controllers.SendSMS (4 handlers)
 [GIN-debug] Listening and serving HTTP on :8080
-[GIN-debug] [WARNING] Headers were already written. Wanted to override status code 400 with 500
-::1 - [Tue, 18 May 2021 15:56:55 +0430] "DELETE /api/loadbanance/delete HTTP/1.1 500 595.4134ms "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36" "

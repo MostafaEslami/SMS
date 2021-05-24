@@ -13,6 +13,8 @@ import (
 
 func main() {
 
+	controllers.Initialize()
+
 	e := godotenv.Load() //Load .env file
 	if e != nil {
 		fmt.Print(e)
@@ -44,7 +46,11 @@ func main() {
 
 	apiRouteGroup := goGonicEngine.Group("/api")
 
-	controllers.LoadBalanceRoutes(apiRouteGroup.Group("/loadbanance"))
+	controllers.RelayRoutes(apiRouteGroup.Group("/relay"))
+
+	controllers.LogCDR(CDR{from: "0912", to: "0913"})
+	controllers.Log(245, "dsadsadsadsa")
 
 	goGonicEngine.Run(":8080") // listen and serve on 0.0.0.0:8080
+
 }
