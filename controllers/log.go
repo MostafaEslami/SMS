@@ -107,11 +107,11 @@ func Initialize() {
 		SetLevelColor(glg.TagStringToLevel(CDR), glg.Orange) // set color output to user custom level
 
 	rl, _ := rotatelogs.New(
-		"access_log.%Y%m%d%H%M",
-		rotatelogs.WithLinkName("access_log"),
+		"CDR/cdr.%Y%m%d%H%M",
+		rotatelogs.WithLinkName("CDR/cdr"),
 		rotatelogs.WithMaxAge(24*time.Hour),
 		rotatelogs.WithRotationTime(time.Hour),
-		rotatelogs.WithRotationSize(100),
+		rotatelogs.WithRotationSize(100*1024),
 	)
 
 	log.SetOutput(rl)

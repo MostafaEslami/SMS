@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	_ "os/exec"
 	_ "runtime"
+	"time"
 )
 
 type Instance struct {
@@ -28,6 +30,10 @@ type Instance struct {
 //	return ret
 //}
 //
+func random(min int, max int) int {
+	return rand.Intn(max-min) + min
+}
+
 func CreateErrorMessage(message string) gin.H {
 	ret := gin.H{
 		"success": false,
@@ -49,6 +55,28 @@ func MakeRequest(mobile string, code string) string {
 	return request
 }
 
+func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
+	r := make(chan int)
+	go func() {
+		request := MakeRequest(mobile, code)
+		fmt.Println("request : ", request)
+		resp, err := http.Get(request)
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			Log(3, "%s", err)
+			return
+		}
+
+		s := fmt.Sprintf("%s", body)
+		cdr := utility.CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: s}
+		LogCDR(cdr)
+		Log(2, cdr.Log())
+
+	}()
+	return r
+}
+
 func SendSMS(c *gin.Context) {
 
 	mobile := c.PostForm("receiver_number")
@@ -57,24 +85,11 @@ func SendSMS(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, CreateErrorMessage("some params is required!"))
 	}
 
-	request := MakeRequest(mobile, code)
-
-	fmt.Println("request:", request)
-	resp, err := http.Get(request)
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		Log(3, "%s", err)
-		c.JSON(http.StatusServiceUnavailable, err)
-	}
-	//c.JSON(http.StatusBadRequest, string(request))
-	//return
-	s := fmt.Sprintf("%s", body)
-	cdr := utility.CDR{Number: mobile, Code: code, MessageId: s}
-	LogCDR(cdr)
-	Log(2, cdr.Log())
+	rand.Seed(time.Now().UnixNano())
+	randomNum := random(100000000000, 200000000000)
+	generatedMessageId := fmt.Sprintf("%d", randomNum)
+	DoneAsync(mobile, code, generatedMessageId)
 	c.JSON(http.StatusOK, gin.H{
-		"data": s,
+		"data": generatedMessageId,
 	})
 }
