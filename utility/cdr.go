@@ -3,10 +3,10 @@ package utility
 import "fmt"
 
 type CDR struct {
-	From, To string
+	Number, Code, MessageId string
 }
 
 func (cdr *CDR) Log() string {
-	s := fmt.Sprintf("%s,%s", cdr.From, cdr.To)
+	s := fmt.Sprintf("%s,%s,%s", cdr.Number, cdr.Code, cdr.MessageId)
 	return s
 }
