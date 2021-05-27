@@ -9,6 +9,7 @@ import (
 	"net/http"
 	_ "os/exec"
 	_ "runtime"
+	"strconv"
 	"time"
 )
 
@@ -98,6 +99,11 @@ func SendSMS(c *gin.Context) {
 	code := c.PostForm("code")
 	if mobile == "" || code == "" {
 		c.JSON(http.StatusBadRequest, CreateErrorMessage("some params is required!"))
+		return
+	}
+
+	if _, err := strconv.Atoi(code); err != nil {
+		c.JSON(http.StatusBadRequest, CreateErrorMessage("only digit is acceptable"))
 		return
 	}
 
