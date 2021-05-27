@@ -61,7 +61,13 @@ func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
 		request := MakeRequest(mobile, code)
 
 		//fmt.Println("request : ", request)
-		resp, err := http.Get(request)
+		resp, err1 := http.Get(request)
+		if resp == nil || resp.Body == nil || err1 != nil {
+			cdr := utility.CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
+			utility.LogCDR(cdr)
+			utility.Log("ERROR", cdr.Log())
+			return
+		}
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
