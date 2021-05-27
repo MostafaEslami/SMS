@@ -2,6 +2,7 @@ package main
 
 import (
 	"ECommerce/controllers"
+	"ECommerce/utility"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ import (
 
 func main() {
 
-	controllers.Initialize()
+	utility.Initialize()
 
 	e := godotenv.Load() //Load .env file
 	if e != nil {
@@ -43,6 +44,9 @@ func main() {
 	goGonicEngine.Use(cors.Default())
 
 	// goGonicEngine.Use(middlewares.Cors())
+
+	utility.IniitalizeCredit()
+	utility.Log("INFO", "credit is ", utility.GetCredit())
 
 	apiRouteGroup := goGonicEngine.Group("/api")
 

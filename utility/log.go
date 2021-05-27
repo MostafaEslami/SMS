@@ -1,7 +1,6 @@
-package controllers
+package utility
 
 import (
-	"ECommerce/utility"
 	"bytes"
 	"context"
 	"errors"
@@ -119,21 +118,21 @@ func Initialize() {
 	/* elsewhere ... */
 	glg.Debug("Log Initialized successfully")
 }
-func Log(level LEVEL, val ...interface{}) {
+func Log(level string, val ...interface{}) {
 	switch level {
-	case LEVEL(glg.DEBG):
+	case "DEBUG":
 		glg.Debug(val)
-	case LEVEL(glg.WARN):
+	case "WARNING":
 		glg.Warn(val)
-	case LEVEL(glg.INFO):
+	case "INFO":
 		glg.Info(val)
-	case LEVEL(glg.ERR):
+	case "ERR":
 		glg.Error(val)
 	default:
 		glg.Debug(val)
 	}
 }
 
-func LogCDR(cdr utility.CDR) {
+func LogCDR(cdr CDR) {
 	log.Printf(cdr.Log())
 }
