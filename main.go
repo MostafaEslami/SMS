@@ -45,8 +45,7 @@ func main() {
 	goGonicEngine.Use(cors.Default())
 
 	// goGonicEngine.Use(middlewares.Cors())
-	credit := os.Getenv("CREDIT")
-	utility.InitializeCredit(credit)
+	utility.IniitalizeCredit()
 	utility.Log("INFO", "credit is ", utility.GetCredit())
 
 	apiRouteGroup := goGonicEngine.Group("/api")

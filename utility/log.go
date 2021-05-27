@@ -74,7 +74,6 @@ func Initialize() {
 	infolog := glg.FileWriter("info.log", 0666)
 	CDR := "CDR"
 	errlog := glg.FileWriter("error.log", 0666)
-	creditlog := glg.FileWriter("credit.log", 0666)
 	warnlog := glg.FileWriter("warn.log", 0666)
 	//rotate := NewRotateWriter(os.Stdin, time.Second*10, bytes.NewBuffer(make([]byte, 0, 4096)))
 
@@ -103,7 +102,6 @@ func Initialize() {
 		AddLevelWriter(glg.INFO, infolog).                   // add info log file destination
 		AddLevelWriter(glg.ERR, errlog).                     // add error log file destination
 		AddLevelWriter(glg.WARN, warnlog).                   // add error log file destination
-		AddLevelWriter(glg.LOG, creditlog).                  // add error log file destination
 		AddStdLevel(CDR, glg.STD, true).                     //user custom log level
 		SetLevelColor(glg.TagStringToLevel(CDR), glg.Orange) // set color output to user custom level
 
@@ -137,8 +135,4 @@ func Log(level string, val ...interface{}) {
 
 func LogCDR(cdr CDR) {
 	log.Printf(cdr.Log())
-}
-
-func LogCredit(credit string) {
-	glg.Log(credit)
 }
