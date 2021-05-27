@@ -26,7 +26,7 @@ func IniitalizeCredit() {
 func ReadCredit() int {
 	f, _ := os.Open(CreditFile)
 	r4 := bufio.NewReader(f)
-	b4, _ := r4.Peek(5)
+	b4, _ := r4.Peek(10)
 	ii, _ := strconv.Atoi(string(b4))
 	return ii
 }
