@@ -9,7 +9,6 @@ import (
 	"github.com/lestrrat-go/file-rotatelogs"
 	"io"
 	"log"
-	"os"
 	"sync"
 	"time"
 )
@@ -75,11 +74,12 @@ func Initialize() {
 	infolog := glg.FileWriter("info.log", 0666)
 	CDR := "CDR"
 	errlog := glg.FileWriter("error.log", 0666)
-	rotate := NewRotateWriter(os.Stdout, time.Second*10, bytes.NewBuffer(make([]byte, 0, 4096)))
+	warnlog := glg.FileWriter("warn.log", 0666)
+	//rotate := NewRotateWriter(os.Stdin, time.Second*10, bytes.NewBuffer(make([]byte, 0, 4096)))
 
-	defer infolog.Close()
-	defer errlog.Close()
-	defer rotate.Close()
+	//defer infolog.Close()
+	//defer errlog.Close()
+	//defer rotate.Close()
 
 	glg.Get().
 		SetMode(glg.BOTH). // default is STD
@@ -101,7 +101,7 @@ func Initialize() {
 		// EnableJSON().
 		AddLevelWriter(glg.INFO, infolog).                   // add info log file destination
 		AddLevelWriter(glg.ERR, errlog).                     // add error log file destination
-		AddLevelWriter(glg.WARN, rotate).                    // add error log file destination
+		AddLevelWriter(glg.WARN, warnlog).                   // add error log file destination
 		AddStdLevel(CDR, glg.STD, true).                     //user custom log level
 		SetLevelColor(glg.TagStringToLevel(CDR), glg.Orange) // set color output to user custom level
 
@@ -126,7 +126,7 @@ func Log(level string, val ...interface{}) {
 		glg.Warn(val)
 	case "INFO":
 		glg.Info(val)
-	case "ERR":
+	case "ERROR":
 		glg.Error(val)
 	default:
 		glg.Debug(val)

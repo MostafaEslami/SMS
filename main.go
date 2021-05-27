@@ -14,12 +14,13 @@ import (
 
 func main() {
 
-	utility.Initialize()
-
 	e := godotenv.Load() //Load .env file
 	if e != nil {
 		fmt.Print(e)
 	}
+
+	port := os.Getenv("PORT")
+	utility.Initialize()
 
 	f, _ := os.Create("gin.log")
 	gin.DefaultWriter = io.MultiWriter(f)
@@ -44,8 +45,8 @@ func main() {
 	goGonicEngine.Use(cors.Default())
 
 	// goGonicEngine.Use(middlewares.Cors())
-
-	utility.IniitalizeCredit()
+	credit := os.Getenv("CREDIT")
+	utility.InitalizeCredit(credit)
 	utility.Log("INFO", "credit is ", utility.GetCredit())
 
 	apiRouteGroup := goGonicEngine.Group("/api")
@@ -56,6 +57,6 @@ func main() {
 	//controllers.LogCDR(cdr)
 	//controllers.Log(245, "dsadsadsadsa")
 
-	goGonicEngine.Run(":5740") // listen and serve on 0.0.0.0:8080
+	goGonicEngine.Run(port) // listen and serve on 0.0.0.0:8080
 
 }

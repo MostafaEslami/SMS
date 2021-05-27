@@ -19,9 +19,11 @@ type FileWriter struct {
 	File string
 }
 
-func IniitalizeCredit() {
+func InitalizeCredit(credit string) {
 	writer = NewFileWriter(CreditFile)
-	counter = ReadCredit()
+	x, _ := strconv.Atoi(credit)
+	counter = x
+	NewFileWriter(credit)
 }
 func ReadCredit() int {
 	f, _ := os.Open(CreditFile)
@@ -31,23 +33,29 @@ func ReadCredit() int {
 	return ii
 }
 func GetCredit() int {
+	if counter == 0 {
+		Log("WARNING", "credit is zero")
+	}
 	return counter
 }
 
 func HasCredit() bool {
-	if ReadCredit() > 0 {
-		return true
-	}
-	return false
-}
-func DecreaseCredit() {
-	if counter > 0 {
-		bs := []byte(strconv.Itoa(counter - 1))
-		counter--
-		writer.Write(bs)
-		Log("INFO", "Decrease credit : ", counter)
-	}
+	return GetCredit() > 0
 
+}
+
+func DecreaseCreditAsync() chan int {
+	r := make(chan int)
+	go func() {
+		if counter > 0 {
+			bs := []byte(strconv.Itoa(counter - 1))
+			counter--
+			writer.Write(bs)
+			Log("DEBUG", "Decrease credit : ", counter)
+		}
+
+	}()
+	return r
 }
 
 func NewFileWriter(file string) *FileWriter {
@@ -69,7 +77,7 @@ func (w *FileWriter) Write(content []byte) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
-	file, err := os.OpenFile(w.File, os.O_WRONLY, 0644)
+	file, err := os.OpenFile(w.File, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}

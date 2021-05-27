@@ -52,8 +52,6 @@ func MakeRequest(mobile string, code string) string {
 
 	//request := fmt.Sprintf("http://5m5.ir/send_via_get/send_sms_by_pattern.php?username=khadamati1400&password=WbUqSBo&receiver_number=%s&pattern_id=%s&pattern_params[]=%s", mobile, pattern, code)
 	request := fmt.Sprintf("http://robots.rahco.ir/api/proxy/send?username=khadamati1400&password=WbUqSBo&receiver_number=%s&pattern_id=38&pattern_params[]=%s&token=rVW9HmLH41RjA5PywpuHGdfXODzbQo", mobile, code)
-	request = fmt.Sprintf("")
-
 	return request
 }
 
@@ -62,7 +60,7 @@ func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
 	go func() {
 		request := MakeRequest(mobile, code)
 
-		fmt.Println("request : ", request)
+		//fmt.Println("request : ", request)
 		resp, err := http.Get(request)
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
@@ -83,21 +81,21 @@ func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
 }
 
 func SendSMS(c *gin.Context) {
-	utility.DecreaseCredit() //TODO
 	if utility.HasCredit() == false {
-		utility.Log("ERROR", "credit error")
-		utility.Log("INFO", "credit is", utility.GetCredit())
+		//utility.Log("WARNING", "credit error")
 		c.JSON(http.StatusBadRequest, CreateErrorMessage("credit error"))
+		return
 	}
-	c.JSON(http.StatusBadRequest, CreateErrorMessage("has credit"))
-	return
+	//c.JSON(http.StatusBadRequest, CreateErrorMessage("has credit"))
+	//return
 	mobile := c.PostForm("receiver_number")
 	code := c.PostForm("code")
 	if mobile == "" || code == "" {
 		c.JSON(http.StatusBadRequest, CreateErrorMessage("some params is required!"))
+		return
 	}
 
-	utility.DecreaseCredit()
+	utility.DecreaseCreditAsync()
 
 	rand.Seed(time.Now().UnixNano())
 	randomNum := random(100000000000, 200000000000)
