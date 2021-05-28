@@ -47,7 +47,13 @@ func DecreaseCredit() {
 		writer.Write(bs)
 		Log("INFO", "Decrease credit : ", counter)
 	}
+}
 
+func SetCredit(c int) {
+	bs := []byte(strconv.Itoa(c))
+	counter = c
+	writer.Write(bs)
+	Log("INFO", "Set Credit : ", counter)
 }
 
 func NewFileWriter(file string) *FileWriter {

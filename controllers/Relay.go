@@ -23,6 +23,8 @@ type Instance struct {
 	Online         bool
 }
 
+var Pattern = "38"
+
 //func CreateSuccessMessage(message string) gin.H {
 //	ret := gin.H{
 //		"success": true,
@@ -43,6 +45,10 @@ func CreateErrorMessage(message string) gin.H {
 	return ret
 }
 
+func SetPattern(p string) {
+	Pattern = p
+}
+
 func RelayRoutes(router *gin.RouterGroup) {
 	{
 		router.POST("/send", SendSMS)
@@ -50,9 +56,8 @@ func RelayRoutes(router *gin.RouterGroup) {
 	}
 }
 func MakeRequest(mobile string, code string) string {
-
 	//request := fmt.Sprintf("http://5m5.ir/send_via_get/send_sms_by_pattern.php?username=khadamati1400&password=WbUqSBo&receiver_number=%s&pattern_id=%s&pattern_params[]=%s", mobile, pattern, code)
-	request := fmt.Sprintf("http://robots.rahco.ir/api/proxy/send?username=khadamati1400&password=WbUqSBo&receiver_number=%s&pattern_id=38&pattern_params[]=%s&token=rVW9HmLH41RjA5PywpuHGdfXODzbQo", mobile, code)
+	request := fmt.Sprintf("http://robots.rahco.ir/api/proxy/send?username=khadamati1400&password=WbUqSBo&receiver_number=%s&pattern_id=%s&pattern_params[]=%s&token=rVW9HmLH41RjA5PywpuHGdfXODzbQo", mobile, Pattern, code)
 	return request
 }
 

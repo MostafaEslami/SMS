@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 	"io"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -46,10 +47,16 @@ func main() {
 
 	// goGonicEngine.Use(middlewares.Cors())
 	utility.IniitalizeCredit()
+	if len(os.Args) > 1 {
+		creditInput := os.Args[1]
+		creditEnter, _ := strconv.Atoi(creditInput)
+		utility.SetCredit(creditEnter)
+	}
+
 	utility.Log("INFO", "credit is ", utility.GetCredit())
 
 	apiRouteGroup := goGonicEngine.Group("/api")
-
+	controllers.SetPattern(os.Getenv("PATTERN"))
 	controllers.RelayRoutes(apiRouteGroup.Group("/sms"))
 
 	//cdr := utility.CDR{From: "sasa", To: "sasasa"}
