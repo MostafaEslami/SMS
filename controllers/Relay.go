@@ -56,7 +56,6 @@ func RelayRoutes(router *gin.RouterGroup) {
 	}
 }
 func MakeRequest(mobile string, code string) string {
-	//request := fmt.Sprintf("http://5m5.ir/send_via_get/send_sms_by_pattern.php?username=khadamati1400&password=WbUqSBo&receiver_number=%s&pattern_id=%s&pattern_params[]=%s", mobile, pattern, code)
 	request := fmt.Sprintf("http://robots.rahco.ir/api/proxy/send?username=khadamati1400&password=WbUqSBo&receiver_number=%s&pattern_id=%s&pattern_params[]=%s&token=rVW9HmLH41RjA5PywpuHGdfXODzbQo", mobile, Pattern, code)
 	return request
 }
@@ -93,11 +92,11 @@ func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
 }
 
 func SendSMS(c *gin.Context) {
-	if utility.HasCredit() == false {
-		//utility.Log("WARNING", "credit error")
-		c.JSON(http.StatusBadRequest, CreateErrorMessage("credit error"))
-		return
-	}
+	//if utility.HasCredit() == false {
+	//	utility.Log("WARNING", "credit error")
+	//	c.JSON(http.StatusBadRequest, CreateErrorMessage("credit error"))
+	//	return
+	//}
 	//c.JSON(http.StatusBadRequest, CreateErrorMessage("has credit"))
 	//return
 	mobile := c.PostForm("receiver_number")
@@ -112,7 +111,8 @@ func SendSMS(c *gin.Context) {
 		return
 	}
 
-	utility.DecreaseCredit()
+	//utility.DecreaseCredit()
+	utility.IncreaseCredit()
 
 	rand.Seed(time.Now().UnixNano())
 	randomNum := random(100000000000, 200000000000)

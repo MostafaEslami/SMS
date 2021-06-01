@@ -110,7 +110,7 @@ func Initialize() {
 		rotatelogs.WithLinkName("CDR/cdr"),
 		rotatelogs.WithMaxAge(24*time.Hour),
 		rotatelogs.WithRotationTime(time.Hour),
-		rotatelogs.WithRotationSize(100*1024),
+		rotatelogs.WithRotationSize(1024*1024),
 	)
 
 	log.SetOutput(rl)

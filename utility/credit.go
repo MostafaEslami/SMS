@@ -49,6 +49,13 @@ func DecreaseCredit() {
 	}
 }
 
+func IncreaseCredit() {
+	bs := []byte(strconv.Itoa(counter - 1))
+	counter++
+	writer.Write(bs)
+	Log("INFO", "increment credit : ", counter)
+}
+
 func SetCredit(c int) {
 	bs := []byte(strconv.Itoa(c))
 	counter = c
