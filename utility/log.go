@@ -109,8 +109,9 @@ func Initialize() {
 		"CDR/cdr.%Y%m%d%H%M",
 		rotatelogs.WithLinkName("CDR/cdr"),
 		rotatelogs.WithMaxAge(24*time.Hour),
-		rotatelogs.WithRotationTime(time.Hour),
-		rotatelogs.WithRotationSize(1024*1024),
+		// rotatelogs.WithRotationTime(time.Hour),
+		// rotatelogs.WithRotationSize(1024*1024),
+		rotatelogs.ForceNewFile(),
 	)
 
 	log.SetOutput(rl)
