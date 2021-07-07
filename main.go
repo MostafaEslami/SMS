@@ -1,8 +1,6 @@
 package main
 
 import (
-	"ECommerce/controllers"
-	"ECommerce/utility"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -21,7 +19,8 @@ func main() {
 	}
 
 	port := os.Getenv("PORT")
-	utility.Initialize()
+
+	Initialize()
 
 	f, _ := os.Create("gin.log")
 	gin.DefaultWriter = io.MultiWriter(f)
@@ -46,18 +45,20 @@ func main() {
 	goGonicEngine.Use(cors.Default())
 
 	// goGonicEngine.Use(middlewares.Cors())
-	utility.IniitalizeCredit()
+	IniitalizeCredit()
 	if len(os.Args) > 1 {
 		creditInput := os.Args[1]
 		creditEnter, _ := strconv.Atoi(creditInput)
-		utility.SetCredit(creditEnter)
+		SetCredit(creditEnter)
 	}
 
-	utility.Log("INFO", "credit is ", utility.GetCredit())
+	Log("INFO", "credit is ", GetCredit())
 
 	apiRouteGroup := goGonicEngine.Group("/api")
-	controllers.SetPattern(os.Getenv("PATTERN"))
-	controllers.RelayRoutes(apiRouteGroup.Group("/sms"))
+	SetPattern(os.Getenv("PATTERN"))
+	CheckRedis(os.Getenv("REDIS"))
+
+	RelayRoutes(apiRouteGroup.Group("/sms"))
 
 	//cdr := utility.CDR{From: "sasa", To: "sasasa"}
 	//controllers.LogCDR(cdr)

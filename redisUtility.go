@@ -1,4 +1,4 @@
-package utility
+package main
 
 import (
 	"context"
@@ -38,7 +38,7 @@ func RemoveFromDB(key string) bool {
 }
 
 func IsExist(key string) int64 {
-	value, err := rdb.Get(ctx, "key").Result()
+	value, err := rdb.Get(ctx, key).Result()
 	if err != nil {
 		Log("ERROR", "Check existence ", key, "to redis failed!!!")
 		return 0
@@ -58,7 +58,7 @@ func CheckRelay(key string) bool {
 	now := time.Now()
 	sec := now.Unix()
 	diff := sec - value
-	if diff > 15552000 {
+	if diff > 2592000 {
 		Log("INFO", "key : ", key, " is exist in DB but time will be updated!!!")
 		Add2DB(key)
 		result = true

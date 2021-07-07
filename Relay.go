@@ -1,13 +1,14 @@
-package controllers
+package main
 
 import (
-	"ECommerce/utility"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/kavenegar/kavenegar-go"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	_ "os/exec"
+	"regexp"
 	_ "runtime"
 	"strconv"
 	"time"
@@ -24,6 +25,7 @@ type Instance struct {
 }
 
 var Pattern = "38"
+var checkRedis = "False"
 
 var client = http.Client{
 	Timeout: 10 * time.Second,
@@ -182,12 +184,15 @@ func CreateErrorMessage(message string) gin.H {
 func SetPattern(p string) {
 	Pattern = p
 }
+func CheckRedis(p string) {
+	checkRedis = p
+}
 
 func RelayRoutes(router *gin.RouterGroup) {
 	InitializeBlockList()
 	{
 		router.POST("/send", SendSMS)
-		router.GET("/credit", GetCredit)
+		router.GET("/credit", GetCreditFromFile)
 		//router.GET("/status", SendStatus)
 	}
 }
@@ -200,29 +205,74 @@ func MakeRequest(mobile string, code string) string {
 func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
 	r := make(chan int)
 	go func() {
-		request := MakeRequest(mobile, code)
+		//request := MakeRequest(mobile, code)
+		api := kavenegar.New("32484B49457845756E635A73623950616D536F4932654D707268534C3070657A32674241706B4A6E5032513D")
+		//sender := ""
+		//receptor := []string{"98", "9132957573"}
+		//message := "سلام و درود"
+		//if res, err := api.Message.Send(sender, receptor, message, nil); err != nil {
+		//	switch err := err.(type) {
+		//	case *kavenegar.APIError:
+		//		fmt.Println(err.Error())
+		//	case *kavenegar.HTTPError:
+		//		fmt.Println(err.Error())
+		//	default:
+		//		fmt.Println(err.Error())
+		//	}
+		//} else {
+		//	for _, r := range res {
+		//		fmt.Println("MessageID 	= ", r.MessageID)
+		//		fmt.Println("Status    	= ", r.Status)
+		//		//...
+		//	}
+		//}
+		receptor := mobile
+		template := "digiyab"
+		token := code
+		params := &kavenegar.VerifyLookupParam{}
+		if res, err := api.Verify.Lookup(receptor, template, token, params); err != nil {
+			switch err := err.(type) {
+			case *kavenegar.APIError:
+				fmt.Println(err.Error())
+			case *kavenegar.HTTPError:
+				fmt.Println(err.Error())
+			default:
+				fmt.Println(err.Error())
+			}
 
-		//fmt.Println("request : ", request)
-		resp, err1 := client.Get(request)
-		if resp == nil || resp.Body == nil || err1 != nil {
-			cdr := utility.CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
-			utility.LogCDR(cdr)
-			utility.Log("ERROR", cdr.Log())
-			return
+			cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
+			LogCDR(cdr)
+			Log("ERROR", cdr.Log())
+		} else {
+			//fmt.Println("MessageID 	= ", res.MessageID)
+			//fmt.Println("Status    	= ", res.Status)
+			//...
+			s := fmt.Sprintf("%d", res.MessageID)
+			cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: s}
+			LogCDR(cdr)
+			Log("INFO", cdr.Log())
 		}
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			cdr := utility.CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
-			utility.LogCDR(cdr)
-			utility.Log("ERROR", cdr.Log())
-			return
-		}
-
-		s := fmt.Sprintf("%s", body)
-		cdr := utility.CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: s}
-		utility.LogCDR(cdr)
-		utility.Log("INFO", cdr.Log())
+		////fmt.Println("request : ", request)
+		//resp, err1 := client.Get(request)
+		//if resp == nil || resp.Body == nil || err1 != nil {
+		//	cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
+		//	LogCDR(cdr)
+		//	Log("ERROR", cdr.Log())
+		//	return
+		//}
+		//defer resp.Body.Close()
+		//body, err := ioutil.ReadAll(resp.Body)
+		//if err != nil {
+		//	cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
+		//	LogCDR(cdr)
+		//	Log("ERROR", cdr.Log())
+		//	return
+		//}
+		//
+		//s := fmt.Sprintf("%s", body)
+		//cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: s}
+		//LogCDR(cdr)
+		//Log("INFO", cdr.Log())
 
 	}()
 	return r
@@ -240,6 +290,10 @@ func SendSMS(c *gin.Context) {
 	//}
 	//c.JSON(http.StatusBadRequest, CreateErrorMessage("has credit"))
 	//return
+	rand.Seed(time.Now().UnixNano())
+	randomNum := random(10000000, 90000000)
+
+	generatedMessageId := fmt.Sprintf("%d", randomNum)
 	mobile := c.PostForm("receiver_number")
 	code := c.PostForm("code")
 	if mobile == "" || code == "" {
@@ -247,36 +301,48 @@ func SendSMS(c *gin.Context) {
 		return
 	}
 
+	match, _ := regexp.MatchString("^(\\+98|98|0?)9(1\\d|9[0-4])[0-9]{7}$", mobile)
+	if !match {
+		Log("ERROR", "only mci ", mobile)
+		c.JSON(http.StatusBadRequest, CreateErrorMessage("only mci"))
+		return
+	}
 	if _, err := strconv.Atoi(code); err != nil {
 		c.JSON(http.StatusBadRequest, CreateErrorMessage("only digit is acceptable"))
 		return
 	}
 
 	if IsBlocked(mobile) {
-		utility.Log("ERROR", "Blocked : ", mobile)
+		Log("ERROR", "Blocked : ", mobile)
 		c.JSON(http.StatusBadRequest, CreateErrorMessage("blocked"))
 		return
 	}
 
-	if !utility.CheckRelay(mobile) {
-		utility.Log("ERROR", "Blocked : ", mobile, " by history")
-		c.JSON(http.StatusBadRequest, CreateErrorMessage("history"))
+	if checkRedis != "False" && mobile != "09132957573" && !CheckRelay(mobile) {
+		Log("ERROR", "Blocked : ", mobile, " by history")
+		cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMessageId, MessageId: "HISTORY"}
+		LogCDR(cdr)
+		Log("WARNING", cdr.Log())
+		//c.JSON(http.StatusBadRequest, CreateErrorMessage("history"))
+
+		c.JSON(http.StatusOK, gin.H{
+			"data": generatedMessageId,
+		})
+
 		return
 	}
 	//utility.DecreaseCredit()
-	utility.IncreaseCredit()
+	IncreaseCredit()
 
-	rand.Seed(time.Now().UnixNano())
-	randomNum := random(10000000, 90000000)
-	generatedMessageId := fmt.Sprintf("%d", randomNum)
 	c.JSON(http.StatusOK, gin.H{
 		"data": generatedMessageId,
 	})
+
 	DoneAsync(mobile, code, generatedMessageId)
 
 }
 
-func GetCredit(c *gin.Context) {
+func GetCreditFromFile(c *gin.Context) {
 	dat, _ := ioutil.ReadFile("credit.txt")
 
 	c.JSON(http.StatusOK, gin.H{
