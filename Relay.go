@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/kavenegar/kavenegar-go"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -34,7 +34,6 @@ var client = http.Client{
 var mBlockList = make(map[string]bool)
 
 func InitializeBlockList() {
-	mBlockList["989132957573"] = true
 	mBlockList["989128181275"] = true
 	mBlockList["09128181275"] = true
 	mBlockList["989128172212"] = true
@@ -196,17 +195,20 @@ func RelayRoutes(router *gin.RouterGroup) {
 		//router.GET("/status", SendStatus)
 	}
 }
-func MakeRequest(mobile string, code string) string {
-	request := fmt.Sprintf("http://robots.rahco.ir/api/proxy/send?username=khadamati1400&password=WbUqSBo&receiver_number=%s&pattern_id=%s&pattern_params[]=%s&token=rVW9HmLH41RjA5PywpuHGdfXODzbQo", mobile, Pattern, code)
-	//request := fmt.Sprintf("http://localhost:3000/send")
-	return request
-}
+
+//func MakeRequest(mobile string, code string) string {
+//	//request := fmt.Sprintf("http://robots.rahco.ir/api/proxy/send?username=khadamati1400&password=WbUqSBo&receiver_number=%s&pattern_id=%s&pattern_params[]=%s&token=rVW9HmLH41RjA5PywpuHGdfXODzbQo", mobile, Pattern, code)
+//	//request := fmt.Sprintf("http://localhost:3000/send")
+//	request := fmt.Sprintf("https://api.bitel.rest/api/v2/sms/single")
+//
+//	return request
+//}
 
 func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
 	r := make(chan int)
 	go func() {
 		//request := MakeRequest(mobile, code)
-		api := kavenegar.New("32484B49457845756E635A73623950616D536F4932654D707268534C3070657A32674241706B4A6E5032513D")
+		//api := kavenegar.New("32484B49457845756E635A73623950616D536F4932654D707268534C3070657A32674241706B4A6E5032513D")
 		//sender := ""
 		//receptor := []string{"98", "9132957573"}
 		//message := "سلام و درود"
@@ -226,33 +228,33 @@ func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
 		//		//...
 		//	}
 		//}
-		receptor := mobile
-		template := "digiyab"
-		token := code
-		params := &kavenegar.VerifyLookupParam{}
-		if res, err := api.Verify.Lookup(receptor, template, token, params); err != nil {
-			switch err := err.(type) {
-			case *kavenegar.APIError:
-				fmt.Println(err.Error())
-			case *kavenegar.HTTPError:
-				fmt.Println(err.Error())
-			default:
-				fmt.Println(err.Error())
-			}
-
-			cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
-			LogCDR(cdr)
-			Log("ERROR", cdr.Log())
-		} else {
-			//fmt.Println("MessageID 	= ", res.MessageID)
-			//fmt.Println("Status    	= ", res.Status)
-			//...
-			s := fmt.Sprintf("%d", res.MessageID)
-			cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: s}
-			LogCDR(cdr)
-			Log("INFO", cdr.Log())
-		}
-		////fmt.Println("request : ", request)
+		//receptor := mobile
+		//template := "digiyab"
+		//token := code
+		//params := &kavenegar.VerifyLookupParam{}
+		//if res, err := api.Verify.Lookup(receptor, template, token, params); err != nil {
+		//	switch err := err.(type) {
+		//	case *kavenegar.APIError:
+		//		fmt.Println(err.Error())
+		//	case *kavenegar.HTTPError:
+		//		fmt.Println(err.Error())
+		//	default:
+		//		fmt.Println(err.Error())
+		//	}
+		//
+		//	cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
+		//	LogCDR(cdr)
+		//	Log("ERROR", cdr.Log())
+		//} else {
+		//	//fmt.Println("MessageID 	= ", res.MessageID)
+		//	//fmt.Println("Status    	= ", res.Status)
+		//	//...
+		//	s := fmt.Sprintf("%d", res.MessageID)
+		//	cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: s}
+		//	LogCDR(cdr)
+		//	Log("INFO", cdr.Log())
+		//}
+		//fmt.Println("request : ", request) //5sms
 		//resp, err1 := client.Get(request)
 		//if resp == nil || resp.Body == nil || err1 != nil {
 		//	cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
@@ -263,7 +265,8 @@ func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
 		//defer resp.Body.Close()
 		//body, err := ioutil.ReadAll(resp.Body)
 		//if err != nil {
-		//	cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
+		//	Log("ERROR", err)
+		//	cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILEDD"}
 		//	LogCDR(cdr)
 		//	Log("ERROR", cdr.Log())
 		//	return
@@ -273,6 +276,35 @@ func DoneAsync(mobile string, code string, generatedMsgId string) chan int {
 		//cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: s}
 		//LogCDR(cdr)
 		//Log("INFO", cdr.Log())
+
+		message := fmt.Sprintf("به اپلیکیشن خوش آمدید\n کد یکبار صرف شما : %s", code)
+		bb := fmt.Sprintf("{'message': '%s', 'phoneNumber': '%s'}", message, mobile)
+		myJson := bytes.NewBuffer([]byte(bb))
+		req, err := http.NewRequest(http.MethodPost, "https://api.bitel.rest/api/v2/sms/single", myJson)
+		req.Header.Add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDk5OCIsImV4cCI6MTk0MTQ0NTAyNywiaXNzIjoiQml0ZWwiLCJhdWQiOiJCaXRlbCJ9.DbcrTX6MP_8p8_ReJM_HusXRGosu29l3DFl1yunRCac")
+		req.Header.Add("Content-Type", "application/json")
+
+		resp, err := client.Do(req)
+		if resp == nil || resp.Body == nil || err != nil {
+			cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILED"}
+			LogCDR(cdr)
+			Log("ERROR", cdr.Log())
+			return
+		}
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			Log("ERROR", err)
+			cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: "FAILEDD"}
+			LogCDR(cdr)
+			Log("ERROR", cdr.Log())
+			return
+		}
+
+		s := fmt.Sprintf("%s", body)
+		cdr := CDR{Number: mobile, Code: code, MyMessageId: generatedMsgId, MessageId: s}
+		LogCDR(cdr)
+		Log("INFO", cdr.Log())
 
 	}()
 	return r
